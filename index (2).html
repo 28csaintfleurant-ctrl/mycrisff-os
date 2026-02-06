@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mycrisff OS - Security Breach</title>
+    <style>
+        :root {
+            --hacker-color: #39FF14;
+            --bg-color: #000;
+            --brightness: 1;
+        }
+
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            background: var(--bg-color); overflow: hidden; 
+            font-family: 'Courier New', monospace; 
+        }
+
+        #brightness-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: black; pointer-events: none; z-index: 9999;
+            opacity: calc(1 - var(--brightness));
+        }
+        
+        canvas { display: block; position: fixed; top: 0; left: 0; z-index: 1; pointer-events: none; }
+
+        /* Login Screen */
+        #login-screen {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 10000; background: #0a0a0a; padding: 30px; 
+            border: 3px solid var(--hacker-color); border-radius: 20px; 
+            text-align: center; width: 300px; box-shadow: 0 0 40px var(--hacker-color);
+        }
+        .pass-input { width: 90%; padding: 12px; background: #000; border: 2px solid var(--hacker-color); color: var(--hacker-color); margin-bottom: 20px; text-align: center; outline: none; }
+        .btn-enter { background: var(--hacker-color); color: #000; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; }
+
+        /* Interface */
+        #browser-ui { display: none; position: relative; z-index: 100; height: 100vh; flex-direction: column; }
+        .tabs-bar { display: flex; align-items: center; background: #000; border-bottom: 2px solid var(--hacker-color); padding: 10px; gap: 5px; }
+        
+        .google-search-box {
+            background: #111; border: 1px solid var(--hacker-color);
+            display: flex; align-items: center; padding: 5px 15px; border-radius: 20px; flex: 1; max-width: 350px;
+        }
+        .google-search-box input { background: transparent; border: none; color: var(--hacker-color); width: 100%; outline: none; }
+
+        #tabs-container { display: flex; gap: 8px; margin-left: 10px; overflow-x: auto; }
+        .tab { background: #111; color: var(--hacker-color); padding: 8px 12px; border-radius: 8px; cursor: pointer; border: 1px solid var(--hacker-color); white-space: nowrap; }
+        .tab.active { background: var(--hacker-color); color: #000; font-weight: bold; }
+
+        /* Config Menu */
+        #config-menu { 
+            display: none; position: absolute; top: 70px; left: 10px; 
+            background: #000; border: 2px solid var(--hacker-color); padding: 20px; 
+            border-radius: 15px; z-index: 500; width: 250px;
+        }
+        .opt-btn { background: #111; color: #fff; border: 1px solid var(--hacker-color); padding: 10px; width: 100%; margin: 8px 0; cursor: pointer; border-radius: 8px; font-weight: bold; }
+
+        /* Multiply Color Picker */
+        .color-picker-container { background: #111; border: 1px solid var(--hacker-color); padding: 10px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; }
+        input[type="color"] { background: none; border: none; width: 35px; height: 35px; cursor: pointer; }
+
+        /* Video Monitor */
+        #mega-hacker-cam {
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 320px; height: 240px; background: #000; border: 3px solid #fff;
+            border-radius: 15px; z-index: 5000; overflow: hidden; cursor: move;
+        }
+        #mega-hacker-cam video { width: 100%; height: 100%; object-fit: cover; }
+
+        /* IA Chat */
+        #ia-chat-box { 
+            display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            width: 350px; height: 450px; background: rgba(5, 5, 5, 0.95); 
+            border: 2px solid var(--hacker-color); z-index: 2000; border-radius: 20px; flex-direction: column; overflow: hidden;
+        }
+        #ia-messages { flex: 1; padding: 15px; color: var(--hacker-color); overflow-y: auto; font-size: 13px; }
+        .ia-input-area { display: flex; border-top: 1px solid var(--hacker-color); padding: 10px; }
+        #ia-user-input { flex: 1; background: transparent; border: none; color: var(--hacker-color); outline: none; font-family: 'Courier New'; }
+
+        /* Keyboard */
+        #hacker-keyboard { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.95); border: 2px solid var(--hacker-color); padding: 15px; border-radius: 15px; z-index: 3000; }
+        .key { background: #111; color: var(--hacker-color); border: 1px solid var(--hacker-color); padding: 10px; min-width: 35px; text-align: center; cursor: pointer; border-radius: 5px; margin: 2px; display: inline-block; }
+
+        .clock { font-size: 80px; font-weight: bold; color: var(--hacker-color); text-align: center; margin-top: 20%; text-shadow: 0 0 15px var(--hacker-color); }
+        .viewport { display: none; flex: 1; }
+        .viewport.active { display: block; }
+        iframe { width: 100%; height: 100%; border: none; }
+    </style>
+</head>
+<body>
+
+    <div id="brightness-overlay"></div>
+    <canvas id="matrix-bg"></canvas>
+
+    <div id="login-screen">
+        <h2 style="color: var(--hacker-color);">MYCRISFF OS</h2>
+        <input type="password" id="pin-field" class="pass-input" placeholder="PIN: 2018">
+        <button class="btn-enter" onclick="unlock()">ENTRAR</button>
+    </div>
+
+    <div id="browser-ui">
+        <div class="tabs-bar">
+            <div style="color: var(--hacker-color); cursor:pointer; font-size: 25px;" onclick="toggleMenu()">☰</div>
+            <div class="google-search-box"><input type="text" id="googleInput" placeholder="Google Search..." onkeypress="if(event.key==='Enter') googleSearch()"></div>
+            <div id="tabs-container"></div>
+            <div style="color: var(--hacker-color); font-size: 30px; cursor: pointer; margin-left: 10px;" onclick="createNewTab()">+</div>
+        </div>
+
+        <div id="config-menu">
+            <button class="opt-btn" style="background: red;" onclick="toggleMegaHacker()">MEGA HACKER</button>
+            <button class="opt-btn" style="background: var(--hacker-color); color:black;" onclick="toggleIA()">IA MYCRISFF</button>
+            <button class="opt-btn" style="background: #f1c40f; color:black;" onclick="toggleKeyboard()">ATIVO HACKER</button>
+            
+            <p style="color:white; font-size:10px; margin-top:15px;">MULTIPLY COLOR</p>
+            <div class="color-picker-container">
+                <span style="color:var(--hacker-color); font-size:12px;">Custom Color</span>
+                <input type="color" oninput="mudarCor(this.value)">
+            </div>
+
+            <p style="color:white; font-size:10px; margin-top:15px;">BRILHO</p>
+            <input type="range" min="10" max="100" value="100" style="width:100%;" oninput="updateBrightness(this.value)">
+
+            <p style="color:white; font-size:10px; margin-top:15px;">SUPORTE</p>
+            <button class="opt-btn" onclick="window.open('https://chat.whatsapp.com/CrWVlCaHt8N0uDVFGCfn8y')">WHATSAPP</button>
+            <button class="opt-btn" onclick="window.location.href='mailto:Chrislot2025@gmail.com'">E-MAIL</button>
+            <button class="opt-btn" onclick="toggleMenu()" style="background:grey;">FECHAR</button>
+        </div>
+
+        <div id="viewports" style="flex:1;"></div>
+    </div>
+
+    <div id="mega-hacker-cam" onmousedown="dragElement(this)">
+        <video autoplay muted loop playsinline><source src="https://assets.mixkit.co/videos/preview/mixkit-security-camera-view-of-a-dark-alley-34440-large.mp4" type="video/mp4"></video>
+        <button onclick="toggleMegaHacker()" style="position:absolute; top:50%; right:10px; transform:translateY(-50%); background:red; color:white; border:none; border-radius:5px; cursor:pointer;">X</button>
+    </div>
+
+    <div id="ia-chat-box">
+        <div style="padding:10px; background:var(--hacker-color); color:black; font-weight:bold; display:flex; justify-content:space-between;">
+            <span>IA CORE</span>
+            <span onclick="toggleIA()" style="cursor:pointer;">X</span>
+        </div>
+        <div id="ia-messages"><div>[SISTEMA]: Aguardando comandos...</div></div>
+        <div class="ia-input-area">
+            <input type="text" id="ia-user-input" placeholder="Comando..." onkeypress="if(event.key==='Enter') sendIAMessage()">
+        </div>
+    </div>
+
+    <div id="hacker-keyboard">
+        <div style="color:red; cursor:pointer; text-align:right;" onclick="toggleKeyboard()">X</div>
+        <div id="keys-area"></div>
+    </div>
+
+    <script>
+        function unlock() {
+            if(document.getElementById('pin-field').value === "2018") {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('browser-ui').style.display = 'flex';
+                createNewTab();
+            }
+        }
+
+        function mudarCor(h) { document.documentElement.style.setProperty('--hacker-color', h); }
+        function updateBrightness(v) { document.documentElement.style.setProperty('--brightness', v/100); }
+        function toggleMegaHacker() { const c = document.getElementById('mega-hacker-cam'); c.style.display = (c.style.display==='block'?'none':'block'); }
+        function toggleIA() { const b = document.getElementById('ia-chat-box'); b.style.display = (b.style.display==='flex'?'none':'flex'); }
+        function toggleKeyboard() { const k = document.getElementById('hacker-keyboard'); k.style.display = (k.style.display==='block'?'none':'block'); }
+        function toggleMenu() { const m = document.getElementById('config-menu'); m.style.display = (m.style.display==='block'?'none':'block'); }
+
+        function sendIAMessage() {
+            const input = document.getElementById('ia-user-input');
+            const box = document.getElementById('ia-messages');
+            if(input.value.trim()){
+                box.innerHTML += `<div>> ${input.value}</div>`;
+                setTimeout(() => { box.innerHTML += `<div>[IA]: Analisando dados... Comando Chris executado.</div>`; box.scrollTop = box.scrollHeight; }, 500);
+                input.value = "";
+            }
+        }
+
+        let tabCount = 0;
+        function createNewTab() {
+            tabCount++;
+            const id = 'tab' + tabCount;
+            const btn = document.createElement('div');
+            btn.className = 'tab'; btn.id = 'btn-'+id;
+            btn.innerHTML = `Aba ${tabCount} <span onclick="closeTab(event,'${id}')" style="color:red; margin-left:5px;">X</span>`;
+            btn.onclick = () => selectTab(id);
+            document.getElementById('tabs-container').appendChild(btn);
+            const vp = document.createElement('div');
+            vp.className = 'viewport'; vp.id = id;
+            vp.innerHTML = `<div class="clock">00:00:00</div>`;
+            document.getElementById('viewports').appendChild(vp);
+            selectTab(id);
+        }
+
+        function selectTab(id) {
+            document.querySelectorAll('.tab, .viewport').forEach(el => el.classList.remove('active'));
+            document.getElementById('btn-'+id).classList.add('active');
+            document.getElementById(id).classList.add('active');
+        }
+
+        function closeTab(e, id) { e.stopPropagation(); document.getElementById('btn-'+id).remove(); document.getElementById(id).remove(); }
+
+        function googleSearch() {
+            const q = document.getElementById('googleInput').value;
+            const activeVp = document.querySelector('.viewport.active');
+            if(q && activeVp) activeVp.innerHTML = `<iframe src="https://www.google.com/search?q=${encodeURIComponent(q)}&igu=1"></iframe>`;
+        }
+
+        function dragElement(elmnt) {
+            var p1 = 0, p2 = 0, p3 = 0, p4 = 0;
+            elmnt.onmousedown = (e) => {
+                p3 = e.clientX; p4 = e.clientY;
+                document.onmouseup = () => { document.onmouseup = null; document.onmousemove = null; };
+                document.onmousemove = (e) => {
+                    p1 = p3 - e.clientX; p2 = p4 - e.clientY;
+                    p3 = e.clientX; p4 = e.clientY;
+                    elmnt.style.top = (elmnt.offsetTop - p2) + "px";
+                    elmnt.style.left = (elmnt.offsetLeft - p1) + "px";
+                    elmnt.style.transform = "none";
+                };
+            };
+        }
+
+        setInterval(() => {
+            const t = new Date().toLocaleTimeString();
+            document.querySelectorAll('.clock').forEach(c => c.innerText = t);
+        }, 1000);
+
+        const canvas = document.getElementById('matrix-bg');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const drops = Array(Math.floor(canvas.width / 18)).fill(1);
+        function drawMatrix() {
+            ctx.fillStyle = "rgba(0,0,0,0.1)"; ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--hacker-color');
+            drops.forEach((y, i) => {
+                ctx.fillText(Math.floor(Math.random()*2), i*18, y*18);
+                if(y*18 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            });
+        }
+        setInterval(drawMatrix, 50);
+
+        "1234567890QWERTYUIOPASDFGHJKLZXCVBNM".split("").forEach(k => {
+            const b = document.createElement('div'); b.className = 'key'; b.innerText = k;
+            b.onclick = () => { document.getElementById('googleInput').value += k; };
+            document.getElementById('keys-area').appendChild(b);
+        });
+    </script>
+</body>
+</html>
